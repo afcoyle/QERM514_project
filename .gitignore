@@ -1,0 +1,6 @@
+# Files to ignore
+
+# Ignore scripts file created when running .Rstudio on Mox
+.Rhistory
+.Rproj.user
+scripts/.Rproj.user

@@ -1,0 +1,445 @@
+---
+title: "02_cleaning_data"
+author: "Aidan Coyle"
+date: "5/12/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+This script examines all our data tables. Since there could be year-to-year variations in table format, we will examine each table before adding to our grand table.
+
+We will start at the oldest data set - 2007 - and then move progressively through each year, adding data.
+
+Importantly, much of these data are codes - for instance, shell condition is measured with codes 1:5. Tables describing the codes used on survey can be found [here](https://www.adfg.alaska.gov/FedAidPDFs/RIR.1J.2008.02.pdf) or [here](https://irma.nps.gov/DataStore/DownloadFile/579097)
+
+### Load libraries
+
+```{r libraries, message=FALSE, warning=FALSE}
+# Add all required libraries here
+list.of.packages <- c("tidyverse", "readxl", "janitor", "lubridate")
+# Get names of all required packages that aren't installed
+new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[, "Package"])]
+# Install all new packages
+if(length(new.packages)) install.packages(new.packages)
+
+
+# Load all required libraries
+lapply(list.of.packages, FUN = function(X) {
+  do.call("require", list(X))
+})
+```
+
+### Read in data files
+
+# NOTE: Add warning=FALSE after finishing this chunk
+
+```{r reading, warning=FALSE}
+# Get a list of all our data files
+files <- paste0("../data/", list.files(path = "../data/"))
+# Display all files we'll be reading in
+files
+
+#### 2007 data -----------
+
+# Read in our data file from 2007
+full_data <- read_excel(files[1])
+
+# Change classes of data to match what is optimal
+full_data[ , c(1, 9, 12, 13, 21, 25:28)] <- lapply(full_data[ , c(1, 9, 12, 13, 21, 25:28)], as.numeric)
+
+full_data[ , c(2:8, 14:20, 22:24, 29:36)] <- lapply(full_data[ , c(2:8, 14:20, 22:24, 29:36)], as.factor)
+
+full_data[, c(10:11)] <- lapply(full_data[ , c(10:11)], as.POSIXct)
+
+full_data$COMMENTS <- as.character(full_data$COMMENTS)
+
+#### 2008 data --------
+
+# Read in our data file from 2008, removing first 13 rows as they're junk
+new_data <- read_excel(files[2], skip = 13, col_names = TRUE)
+
+# See if names for two data files match
+names(full_data)==names(new_data)
+
+# There are three extra columns in the 2008 data for pot_escape_device_code, pot_escape_device, and a meaningless column of NAs. We don't care about these, so remove.
+new_data <- new_data[, -c(16, 17, 40)]
+
+# See if we have any column headers that don't match
+all(names(full_data)==names(new_data))
+
+# Now, change classes in new_data to match classes in full_data that were specified earlier
+new_data[ , c(1, 9, 12, 13, 21, 25:28)] <- lapply(new_data[ , c(1, 9, 12, 13, 21, 25:28)], as.numeric)
+
+new_data[ , c(2:8, 14:20, 22:24, 29:36)] <- lapply(new_data[ , c(2:8, 14:20, 22:24, 29:36)], as.factor)
+
+new_data[, c(10:11)] <- lapply(new_data[ , c(10:11)], as.POSIXct)
+
+new_data$COMMENTS <- as.character(new_data$COMMENTS)
+
+# All good! Next, bind 2008 data to 2007 table
+full_data <- bind_rows(full_data, new_data)
+
+#### 2009 data ----------------
+
+# Read in 2009 data
+new_data <- read_excel(files[3])
+
+# See if names for two data files match
+names(full_data)==names(new_data)
+
+# There are two extra columns in the 2009 data for pot_escape_device_code and pot_escape_device. We don't care about these, so remove.
+new_data <- new_data[, -c(16, 17)]
+
+# See if we have any column headers that don't match
+all(names(full_data)==names(new_data))
+
+# All good! Alright, ensure that classes in 2009 columns match the full data sheet
+new_data[ , c(1, 9, 12, 13, 21, 25:28)] <- lapply(new_data[ , c(1, 9, 12, 13, 21, 25:28)], as.numeric)
+
+new_data[ , c(2:8, 14:20, 22:24, 29:36)] <- lapply(new_data[ , c(2:8, 14:20, 22:24, 29:36)], as.factor)
+
+new_data[, c(10:11)] <- lapply(new_data[ , c(10:11)], as.POSIXct)
+
+new_data$COMMENTS <- as.character(new_data$COMMENTS)
+
+# Next, bind 2009 data to full data table
+full_data <- bind_rows(full_data, new_data)
+
+#### 2010 data ------------
+
+# Read in 2010 data
+new_data <- read_excel(files[4])
+
+# See if names for two data files match
+names(full_data)==names(new_data)
+
+# There are five extra columns in the 2010 data for pot_escape_device_code, pot_escape_device, duro_reading_1, duro_reading_2, and duro_reading_3. We don't care about these, so remove.
+new_data <- new_data[, -c(16, 17, 39:41)]
+
+# See if we have any column headers that don't match
+all(names(full_data)==names(new_data))
+
+# All good! Alright, ensure that classes in 2010 columns match the full data sheet
+new_data[ , c(1, 9, 12, 13, 21, 25:28)] <- lapply(new_data[ , c(1, 9, 12, 13, 21, 25:28)], as.numeric)
+
+new_data[ , c(2:8, 14:20, 22:24, 29:36)] <- lapply(new_data[ , c(2:8, 14:20, 22:24, 29:36)], as.factor)
+
+new_data[, c(10:11)] <- lapply(new_data[ , c(10:11)], as.POSIXct)
+
+new_data$COMMENTS <- as.character(new_data$COMMENTS)
+
+# Next, bind 2010 data to full data table
+full_data <- bind_rows(full_data, new_data)
+
+#### 2011 data ------------
+
+# Read in 2011 data
+new_data <- read_excel(files[5])
+
+# See if names for two data files match
+names(full_data)==names(new_data)
+
+# There are six extra columns in the 2011 data for location, pot_escape_device_code, pot_escape_device, duro_reading_1, duro_reading_2, and duro_reading_3. We still have the location_code column and don't care about the rest, so we'll remove all
+new_data <- new_data[, -c(5, 17, 18, 40:42)]
+
+# See if we have any column headers that don't match
+all(names(full_data)==names(new_data))
+
+# All good! Alright, ensure that classes in 2011 columns match the full data sheet
+new_data[ , c(1, 9, 12, 13, 21, 25:28)] <- lapply(new_data[ , c(1, 9, 12, 13, 21, 25:28)], as.numeric)
+
+new_data[ , c(2:8, 14:20, 22:24, 29:36)] <- lapply(new_data[ , c(2:8, 14:20, 22:24, 29:36)], as.factor)
+
+new_data[, c(10:11)] <- lapply(new_data[ , c(10:11)], as.POSIXct)
+
+new_data$COMMENTS <- as.character(new_data$COMMENTS)
+
+# Next, bind 2011 data to full data table
+full_data <- bind_rows(full_data, new_data)
+
+#### 2012 data ------------
+
+# Read in 2012 data
+new_data <- read_excel(files[6])
+
+# See if names for two data files match
+names(full_data)==names(new_data)
+
+# There are six extra columns in the 2012 data for location, pot_escape_device_code, pot_escape_device, duro_reading_1, duro_reading_2, and duro_reading_3. We still have the location_code column and don't care about the rest, so we'll remove all
+new_data <- new_data[, -c(5, 17, 18, 40:42)]
+
+# See if we have any column headers that don't match
+all(names(full_data)==names(new_data))
+
+# All good! Alright, ensure that classes in 2012 columns match the full data sheet
+new_data[ , c(1, 9, 12, 13, 21, 25:28)] <- lapply(new_data[ , c(1, 9, 12, 13, 21, 25:28)], as.numeric)
+
+new_data[ , c(2:8, 14:20, 22:24, 29:36)] <- lapply(new_data[ , c(2:8, 14:20, 22:24, 29:36)], as.factor)
+
+new_data[, c(10:11)] <- lapply(new_data[ , c(10:11)], as.POSIXct)
+
+new_data$COMMENTS <- as.character(new_data$COMMENTS)
+
+# Next, bind 2012 data to full data table
+full_data <- bind_rows(full_data, new_data)
+
+# Write our new full data table to a file as unfiltered data
+fullpath <- "../data/full_data_unfiltered.csv"
+write.csv(full_data, file = fullpath,
+          row.names = FALSE)
+
+```
+
+### Cleaning full data file
+
+At this stage, we have a single file containing all our data. However, not all our columns are meaningful, and we want to check for odd entries
+
+#### Cleaning Columns
+
+```{r col_cleaning}
+# See names of all columns
+names(full_data)
+
+# Without looking at the data - just the survey protocol - , we know we don't care about the following columns:
+
+# PROJECT_CODE
+
+# TRIP_NO
+
+# POT_NO
+
+# SUB_LOCATION_CODE (we'll just be looking at location)
+
+# POT_TYPE (only cone pots were used on these surveys)
+
+# BUOY_NO
+
+# TIME_SET (we're going to examine Julian day, so only one column with date info is needed)
+
+# LATITUDE_DECIMAL_DEGREES
+
+# LONGITUDE_DECIMAL_DEGREES
+
+# POT_CONDITION_CODE
+
+# POT_CONDITION
+
+# DEBRIS_TYPE_CODE
+
+# DENSITY_STRATA_CODE
+
+# DENSITY_STRATA
+
+# SPECIMEN_NO
+
+# NUMBER_OF_CRAB (this is a measure of subsampling, which doesn't mater for this analysis)
+
+# RECRUIT_STATUS (this is binned by carapace width, which we will keep as a parameter)
+
+# LENGTH_MILLIMETERS (Tanner crab are measured by carapace width)
+
+# CHELA_HEIGHT_MILLIMETERS (the ratio of carapace width to chela height determines maturity for male Tanners. However, since this takes much longer, it is rarely noted in the field, and would artificially restrict our dataset)
+
+# LEGAL_SIZE_CODE (Tanner crab legality is measured by carapace width, so this is almost identical to binning WIDTH_MILLIMETERS at a set point)
+
+# EGG_PERCENT (we're looking for factors that could cause Hematodinium infection. While there could be a particular development stage that makes female Tanners vulnerable, it's more likely that Hematodinium infection would impact egg development than vice-versa, so will remove)
+
+# EGG_DEVELOPMENT_CODE (for same reason as above)
+
+# EGG_CONDITION_CODE (for same reason as above)
+
+# COMMENTS
+
+# Therefore, all the above columns will be removed
+
+full_data <- subset(full_data, select = -c(PROJECT_CODE, TRIP_NO, POT_NO, SUB_LOCATION_CODE, POT_TYPE, BUOY_NO, TIME_SET, LATITUDE_DECIMAL_DEGREES, LONGITUDE_DECIMAL_DEGREES, POT_CONDITION_CODE, POT_CONDITION, DEBRIS_TYPE_CODE, DENSITY_STRATA_CODE, DENSITY_STRATA, SPECIMEN_NO, NUMBER_OF_CRAB, RECRUIT_STATUS, LENGTH_MILLIMETERS, CHELA_HEIGHT_MILLIMETERS, LEGAL_SIZE_CODE, EGG_PERCENT, EGG_DEVELOPMENT_CODE, EGG_CONDITION_CODE, COMMENTS))
+
+# Check some additional columns to see if they have enough data to justify being kept
+sum(is.na(full_data$WEIGHT_GRAMS))
+
+# Only around 500 of 15,000 rows have a non-NA value - we can therefore drop
+full_data <- subset(full_data, select = -c(WEIGHT_GRAMS))
+
+# We can also change our TIME_HAULED column to select specifically the Julian day
+full_data$JUL_DAY <- yday(full_data$TIME_HAULED)
+
+# Change to numeric because we're treating as continuous variable
+full_data$JUL_DAY <- as.numeric(full_data$JUL_DAY)
+
+# Now remove the old TIME_HAULED column
+full_data <- subset(full_data, select = -c(TIME_HAULED))
+```
+#### Row Cleaning
+
+```{r row_cleaning}
+
+# Now, we can start to clean up our rows
+
+# See how many NAs in each column
+colSums(is.na(full_data))
+
+# There should be lots of overlap in these - let's remove crabs with unknown sex and shell condition and see how many NAs remain
+
+full_data <- full_data %>%
+  drop_na(c(SEX_CODE, SHELL_CONDITION_CODE))
+
+colSums(is.na(full_data))
+
+# At most, removing all NAs from the dataset would drop around 150 of our ~15,000 rows. Therefore, we'll drop all rows containing any NAs
+
+full_data <- na.omit(full_data)
+  
+```
+
+
+```{r data_filtering}
+
+# Remove all rows without Tanner crab (species code = 931)
+full_data <- full_data[full_data$SPECIES_CODE=="931",]
+
+# We can also then remove the SPECIES_CODE column, as all rows are now Tanner crab
+full_data <- subset(full_data, select = -c(SPECIES_CODE))
+
+# See table of location by year 
+table(full_data$LOCATION_CODE, full_data$YEAR)
+
+# Both year and location look acceptable, although stations 12+ are only sampled in 3 years
+
+# Now examine depth
+hist(full_data$DEPTH_FATHOMS)
+min(full_data$DEPTH_FATHOMS)
+max(full_data$DEPTH_FATHOMS)
+# All values seem to be reasonable
+
+# Now examining Julian day
+hist(full_data$JUL_DAY)
+min(full_data$JUL_DAY)
+max(full_data$JUL_DAY)
+# Looks like all surveys took place in the middle of the year - an examination of the unfiltered data shows between June and October - with no clear data entry mistakes or oddities
+
+# Now examining substrate type
+table(full_data$SUBSTRATE_TYPE_CODE)
+nrow(full_data) - sum(full_data$SUBSTRATE_TYPE_CODE==0 | full_data$SUBSTRATE_TYPE_CODE == 1)
+# 14,000 of our 14,500 rows are either 0 (unknown) or 1 (mud). Therefore, we will drop this column
+full_data <- subset(full_data, select = -c(SUBSTRATE_TYPE_CODE))
+
+# Now examining sex code
+table(full_data$SEX_CODE)
+# All are 1 or 2 (M or F respectively). We'll change the levels of the factor to M and F to be more intuitive
+full_data$SEX_CODE <- recode_factor(full_data$SEX_CODE, "1" = "M", "2" = "F")
+
+# Now examining carapace width. We'll examine M and F crabs separately, since mature male crabs are much larger
+hist(full_data[full_data$SEX_CODE == "M", ]$WIDTH_MILLIMETERS)
+
+hist(full_data[full_data$SEX_CODE == "F", ]$WIDTH_MILLIMETERS)
+
+min(full_data$WIDTH_MILLIMETERS)
+
+max(full_data[full_data$SEX_CODE == "M", ]$WIDTH_MILLIMETERS)
+
+max(full_data[full_data$SEX_CODE == "F", ]$WIDTH_MILLIMETERS)
+
+# The largest female looks much too large. Let's pull out the largest 20 females
+
+females <- full_data %>%
+  group_by(SEX_CODE) %>%
+  top_n(20, WIDTH_MILLIMETERS)
+females <- females[females$SEX_CODE == "F", ]
+
+sort(females$WIDTH_MILLIMETERS)
+
+# 2 of our females are almost certainly data entry errors - a female nearly as large as the largest male is implausible, given that a typical female is a small fraction of the size of a male. The third largest - 160mm - is also likely a data entry error. Therefore, all females with a carapace width >= 160mm will be removed
+
+full_data <- full_data %>%
+  filter(SEX_CODE == "M" | WIDTH_MILLIMETERS < 160)
+
+# Next up - checking shell condition code
+table(full_data$SHELL_CONDITION_CODE)
+# To reduce the number of categories, we'll merge crabs with shell condition 1 (shell condition soft, 0-2 weeks post-molt) and shell condition 2 (shell condition light, 2-8 weeks post-molt). This is because we have only a few shell condition 1 crabs (21 total), the boxes for other shell conditions are much larger (10 months - 1 year), and most importantly, our key question here is whether molting makes crabs prone to infection - due to the slow progression of Hematodinium, crabs aren't dying or fighting off the infection between weeks 0 and 8 of their initial infection, so grouping these codes loses minimal biological information
+full_data$SHELL_CONDITION_CODE <- recode_factor(full_data$SHELL_CONDITION_CODE, "1" = "2", "2" = "2")
+
+# Next up is black mat condition code
+table(full_data$BLACKMAT_CODE)
+# All are valid data codes. Continuing:
+
+# Next up are parasite codes
+table(full_data$PARASITE_CODE)
+# All but 8 crabs are either parasite-free or are positive for Hematodinium. Therefore, we will remove all crab with other parasite codes
+full_data <- full_data %>%
+  filter(PARASITE_CODE == 1 | PARASITE_CODE == 6)
+# Change parasite codes to 0 (uninfected) and 1 (infected) so more easily interpreted by modeling functions
+full_data$PARASITE_CODE <- recode_factor(full_data$PARASITE_CODE, "1" = "0", "6" = "1")
+
+
+# Finally we have our leg condition codes
+table(full_data$LEG_CONDITION_CODE)
+# All are valid data codes. However, we don't necessarily care how many legs the crabs are missing - we care whether they suffered an injury or not, as the hypothesis is that open wounds allow Hematodinium to enter and infect the crab. Therefore, we will change this to a binary - no legs missing/no carapace cracks vs. 1+ legs missing/carapace cracks
+full_data$LEG_CONDITION_CODE <- recode_factor(full_data$LEG_CONDITION_CODE, "1" = "0", "2" = "1", "3" = "1", "4" = "1")
+```
+
+### Examining distribution over time of each variable
+
+This allows us to look at each survey separately to see if there are any surveys that differ dramatically from the typical survey
+
+```{r}
+# Distribution in location by year
+ggplot(full_data, aes(fill = LOCATION_CODE, x = as.factor(YEAR))) +
+  geom_bar(position = "fill")
+# Looks like even-numbered years sampled additional stations (codes 12+) while odd-numbered years stayed within the core stations (codes 1-8)
+
+# Distribution of depths by year
+ggplot(full_data, aes(x = as.factor(YEAR), y = DEPTH_FATHOMS)) +
+  geom_violin() +
+  scale_y_reverse() 
+# Looks like depth is relatively static between years
+
+
+# Distribution of sex
+ggplot(full_data, aes(fill = SEX_CODE, x = as.factor(YEAR))) +
+  geom_bar(position = "fill")
+# Sex is relatively static over time, with around 75% of the catch being males
+
+# Size distribution (males only)
+ggplot(full_data[full_data$SEX_CODE == "M",], aes(x = as.factor(YEAR), y = WIDTH_MILLIMETERS)) +
+  geom_violin()
+# Some different shapes over time - some smooth curves, others showing bulges that likely correspond with strong (or weak) recruitment
+
+# Size distribution (females only)
+ggplot(full_data[full_data$SEX_CODE == "F",], aes(x = as.factor(YEAR), y = WIDTH_MILLIMETERS)) +
+  geom_violin()
+# More evenly distributed than males, though with some variability over time
+
+# Distribution of shell conditions
+ggplot(full_data, aes(fill = SHELL_CONDITION_CODE, x = YEAR)) +
+  geom_bar(position = "fill")
+# Roughly the same proportion of shell conditions between surveys
+
+# Distribution of Black Mat disease
+ggplot(full_data, aes(fill = BLACKMAT_CODE, x = as.factor(YEAR))) +
+  geom_bar(position = "fill")
+# Some variability, but fairly even between surveys
+
+# Distribution of Hematodinium infection
+ggplot(full_data, aes(fill = PARASITE_CODE, x = as.factor(YEAR))) +
+  geom_bar(position = "fill")
+# Hmm, an intriguing alternate-years pattern seems to show up here! Although that could be an effect of survey location and plenty else at this stage
+
+# Distribution of leg loss status
+ggplot(full_data, aes(fill = LEG_CONDITION_CODE, x = as.factor(YEAR))) +
+  geom_bar(position = "fill")
+# Roughly the same number of crabs missing legs between surveys
+
+```
+### Write our cleaned data file to our data directory for future use
+
+```{r}
+cleanpath <- "../data/allyears_cleaned.csv"
+
+write.csv(full_data, file = cleanpath,
+          row.names = FALSE)
+```
+
+

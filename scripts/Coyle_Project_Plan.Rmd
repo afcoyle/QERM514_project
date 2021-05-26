@@ -1,0 +1,60 @@
+---
+title: "Project Plan"
+author: "Aidan Coyle"
+date: "5/4/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Modeling Hematodinium Infection in Southeastern Alaska
+
+### Background 
+
+Since the 1980s, the Tanner crab (_Chionoecetes opilio_) population in southeastern Alaska has been harmed by the emergence of bitter crab syndrome. As the name implies, the disease causes the crab meat to turn bitter and unpalatable - and thus unmarketable. Furthermore, over a period of several months, it results in the death of the crab. The causative agent of bitter crab syndrome is the parasitic dinoflagellate _Hematodinium sp._. Despite the long-term presence of _Hematodinium sp._ within a population that has economic, cultural, and ecological importance, little is known about what factors drive the dynamics of infection. Therefore, my plan is to attempt to find **whether various environmental and biological factors are linked to the rates of _Hematodinium sp._ infection**
+
+### Data
+
+Our data set contains information from the Alaska Department of Fish and Game Southeast Alaska pot surveys from 2007-2012. The data sets are quite extensive, with over 40 potential predictors. Naturally, this is far too much complexity to analyze (at least for me), so my plan is to restrict the model to predictors that could plausibly explain _Hematodinium sp._ infection rates in some way. Broadly speaking, these predictors fall into two categories - environmental and biological. 
+
+**Environmental**: 
+
+Year: infection prevalence could vary based on year-to-year factors
+
+Site: certain fjords and areas have reliably different infection rates
+
+Latitude: some systems have found linkages between temperature and _Hematodinium sp._ prevalence in other hosts
+
+Depth: infected crabs may prefer different depths
+
+Time of day: _Hematodinium sp._ infection increases lethargy, and thus sampling time could impact whether infected crabs are more or less likely to enter pots
+
+Bottom substrate: it is likely that infections occur from infected crab releasing dinospores into the water column, and dinospores may survive better in certain substrates
+
+**Biological**: 
+
+Crab prevalence: areas with high concentrations of crab may allow the infection to spread more easily
+
+Life stage: certain life stages of crab may be more vulnerable to infection.
+
+Carapace width: putting energy into growth may negatively impact the immune system, or larger crabs may be more generally robust.
+
+Chela height/carapace width ratio: This ratio is a marker for when Tanner crabs have reached their terminal molt. One hypothesis is that molting can sometimes remove the infection, thus terminal molt status could impact infection rates. 
+
+Shell condition: the dinoflagellate may enter shortly after molting when the carapace is soft and pliable, thus time since last molt could impact infection rates
+
+Prevalence of missing legs: as a potentially waterborne pathogen, crabs with open wounds may be more vulnerable to infection
+
+Prevalence of other parasites: infected crabs may have depressed immune systems, making _Hematodinium sp._ infection more likely. Alternatively, certain parasites could compete with _Hematodinium sp._, thus making the crab more resilient to _Hematodinium sp._ infection
+
+
+### Model
+
+There will certainly be random effects - I plan to use random effects for year, site, and latitude. 
+
+There are two ways to approach the model, as I see it. I could build a linear model (in which my y-values would be the infection rates at each site) or a binomial regression model (in which my y-values would be the infection statuses of each crab). At the moment, I plan to build a linear model. Therefore, my individual-specific variables (such as carapace width) will be binned into categories and modified to predictors such as "prevalence of crabs with CW 100-110mm"
+
+To start, we will build a full model. Since we have potential collinearities (carapace width vs. chela height/carapace width vs. life stage) and a large amount of data, we will use out-of-sample procedures and split the dataset in half to determine which combination of predictors results in the smallest MSPE. After collinearities have been dealt with, we will use AIC to determine which combination of predictors to include results in the optimal model.
+
