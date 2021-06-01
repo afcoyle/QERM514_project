@@ -187,7 +187,7 @@ new_data$COMMENTS <- as.character(new_data$COMMENTS)
 full_data <- bind_rows(full_data, new_data)
 
 # Write our new full data table to a file as unfiltered data
-fullpath <- "../data/full_data_unfiltered.csv"
+fullpath <- "../output/crab_data_tables/full_data_unfiltered.csv"
 write.csv(full_data, file = fullpath,
           row.names = FALSE)
 
@@ -436,7 +436,7 @@ ggplot(full_data, aes(fill = LEG_CONDITION_CODE, x = as.factor(YEAR))) +
 ### Write our cleaned data file to our data directory for future use
 
 ```{r}
-cleanpath <- "../data/allyears_cleaned.csv"
+cleanpath <- "../output/crab_data_tables/allyears_cleaned.csv"
 
 write.csv(full_data, file = cleanpath,
           row.names = FALSE)

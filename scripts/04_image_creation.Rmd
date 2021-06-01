@@ -1,0 +1,50 @@
+---
+title: "04_image_creation"
+author: "Aidan Coyle"
+date: "5/27/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+This document is used to create tables and images for display in the final paper
+
+
+
+### Table of Variables and Reasoning
+
+
+| Variable               | Categorical or Continuous | Reason for choosing                                                              |
+|------------------------|---------------------------|----------------------------------------------------------------------------------|
+| Hematodinium infection | Categorical               | Response variable                                                                |
+| Year                   | Continuous                | Prevalence may differ by year                                                    |
+| Location               | Categorical               | Prevalence may differ by location                                                |
+| Carapace width         | Continuous                | Life stage may impact vulnerability                                              |
+| Julian day             | Continuous                | Prevalence may differ throughout year                                            |
+| Sex                    | Categorical               | Egg production may impact vulnerability                                          |
+| Shell condition        | Categorical               | Molting may make crabs vulnerable due to weakened shell                          |
+| Black Mat Disease      | Categorical               | May result in decreased immune system or increased resistance due to competition |
+| Missing legs?          | Categorical               | Wounds may make crabs vulnerable due to infection                                |
+
+
+### Table of Avg. Model Output
+
+|                        | Estimate  | Std. Error | Adjusted SE | z value | Pr (>\|z\|) |
+|------------------------|-----------|------------|-------------|---------|-------------|
+| (Intercept)            | -10.65688 | 11.85864   | 11.85963    | 0.899   | 0.369       |
+| BLACKMAT_CODE.L        | -10.12176 | 16.77164   | 16.77304    | 0.603   | 0.546       |
+| DEPTH_SCALED           | -0.50887  | 0.05463    | 0.05464     | 9.313   | <2e-16 ***  |
+| SHELL_CONDITION_CODE.L | -1.54969  | 0.26261    | 0.26263     | 5.901   | <2e-16 ***  |
+| SHELL_CONDITION_CODE.Q | -1.68320  | 0.19912    | 0.19914     | 8.453   | <2e-16 ***  |
+| SHELL_CONDITION_CODE.C | 0.64983   | 0.10591    | 0.10592     | 6.135   | <2e-16 ***  |
+| WIDTH_SCALED           | 0.20714   | 0.03107    | 0.03108     | 6.665   | <2e-16 ***  |
+| DAY_SCALED             | -0.00975  | 0.05200    | 0.05200     | 0.187   | 0.851       |
+
+
+
+```{r}
+
+```
+
