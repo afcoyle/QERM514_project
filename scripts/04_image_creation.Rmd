@@ -9,24 +9,99 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-This document is used to create tables and images for display in the final paper
+This document is used to create tables and images for display in the final paper and presentation
+
+# Load libraries and data, change data classes
+
+```{r}
+library(tidyverse)
+library(viridis)
+
+# Load in our data file created in the previous script
+crabdat <- read.csv("../output/crab_data_tables/allyears_cleaned.csv")
+
+# Convery columns to factors
+crabdat$LOCATION_CODE <- factor(crabdat$LOCATION_CODE)
+crabdat$SEX_CODE <- ordered(crabdat$SEX_CODE,
+                            levels = c("M", "F"))
+crabdat$SHELL_CONDITION_CODE <- ordered(crabdat$SHELL_CONDITION_CODE)
+crabdat$BLACKMAT_CODE <- ordered(crabdat$BLACKMAT_CODE)
+crabdat$PARASITE_CODE <- ordered(crabdat$PARASITE_CODE)
+crabdat$LEG_CONDITION_CODE <- ordered(crabdat$LEG_CONDITION_CODE)
+
+```
+
+
+### Final Presentation Graphs
+
+
+```{r graph_creation}
+# Shell condition and Hematodinium
+ggplot(crabdat, aes(fill = PARASITE_CODE, x = SHELL_CONDITION_CODE)) +
+  geom_bar(position = "fill") +
+  labs(x = "Shell condition",
+       y = "Proportion") +
+  scale_x_discrete(labels = c("Fresh", "New", "Old", "Very old")) +
+  scale_fill_manual(values = viridis(2),
+                    name = "Hematodinium",
+                    labels = c("Uninfected", "Infected"))
+
+
+
+# Depth and Hematodinium
+ggplot(crabdat, aes(x = PARASITE_CODE, y = DEPTH_FATHOMS)) +
+  geom_violin() +
+  scale_y_reverse() +
+  labs(x = "Hematodinium", 
+       y = "Depth (fathoms)") +
+  scale_x_discrete(labels = c("Uninfected", "Infected")) +
+  theme_minimal()
+  
+# Carapace Width  and Hematodinium
+ggplot(crabdat, aes(x = PARASITE_CODE, y = WIDTH_MILLIMETERS)) +
+  geom_violin() +
+  labs(x = "Hematodinium", 
+       y = "Carapace width (mm)") +
+  scale_x_discrete(labels = c("Uninfected", "Infected")) +
+  theme_minimal()
+  
+
+  
+
+
+# Black Mat and Hematodinium
+ggplot(crabdat, aes(fill = PARASITE_CODE, x = BLACKMAT_CODE)) +
+  geom_bar(position = "fill") +
+  labs(x = "Black Mat",
+       y = "Proportion") +
+  scale_x_discrete(labels = c("Uninfected", "Infected")) +
+  scale_fill_manual(values = viridis(2),
+                    name = "Hematodinium",
+                    labels = c("Uninfected", "Infected"))
+  
+
+
+nrow(crabdat[crabdat$PARASITE_CODE==1,])
+
+```
 
 
 
 ### Table of Variables and Reasoning
 
 
-| Variable               | Categorical or Continuous | Reason for choosing                                                              |
-|------------------------|---------------------------|----------------------------------------------------------------------------------|
-| Hematodinium infection | Categorical               | Response variable                                                                |
-| Year                   | Continuous                | Prevalence may differ by year                                                    |
-| Location               | Categorical               | Prevalence may differ by location                                                |
-| Carapace width         | Continuous                | Life stage may impact vulnerability                                              |
-| Julian day             | Continuous                | Prevalence may differ throughout year                                            |
-| Sex                    | Categorical               | Egg production may impact vulnerability                                          |
-| Shell condition        | Categorical               | Molting may make crabs vulnerable due to weakened shell                          |
-| Black Mat Disease      | Categorical               | May result in decreased immune system or increased resistance due to competition |
-| Missing legs?          | Categorical               | Wounds may make crabs vulnerable due to infection                                |
+| Variable               | Categorical or Continuous | Reason for choosing                                     | AIC compared to null model |
+|------------------------|---------------------------|---------------------------------------------------------|----------------------------|
+| Hematodinium infection | Categorical               | Response variable                                       | NA                         |
+| Year                   | Continuous                | Random effect. Prevalence may differ by year            | NA                         |
+| Location               | Categorical               | Random effect. Prevalence may differ by location        | NA                         |
+| Shell condition        | Categorical               | Molting may make crabs vulnerable due to weakened shell | -791.8                     |
+| Carapace width         | Continuous                | Life stage may impact vulnerability                     | -104.2                     |
+| Black Mat Disease      | Categorical               | May weaken immune system or compete with Hematodinium   | -73.8                      |
+| Sex                    | Categorical               | Egg production may impact vulnerability                 | -19.4                      |
+| Missing legs?          | Categorical               | Wounds may make crabs vulnerable due to infection       | -8.9                       |
+| Julian day             | Continuous                | Prevalence may differ throughout year                   | -3.3                       |
+
 
 
 ### Table of Avg. Model Output
@@ -41,10 +116,4 @@ This document is used to create tables and images for display in the final paper
 | SHELL_CONDITION_CODE.C | 0.64983   | 0.10591    | 0.10592     | 6.135   | <2e-16 ***  |
 | WIDTH_SCALED           | 0.20714   | 0.03107    | 0.03108     | 6.665   | <2e-16 ***  |
 | DAY_SCALED             | -0.00975  | 0.05200    | 0.05200     | 0.187   | 0.851       |
-
-
-
-```{r}
-
-```
 

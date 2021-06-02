@@ -126,27 +126,6 @@ crabdat$DAY_SCALED <- scale(crabdat$JUL_DAY)
 
 ## Modeling
 
-#### Penalized Quasi-Likelihood
-
-Now we're ready to model! First, we'll try to model with penalized quasi-likelihood. These are labeled pql_ [for penalized quasi-likelihood] ns/nw [for no sex or no width] full_mod
-
-```{r}
-# First, trying nearly full model with penalized quasi-likelihood. This one includes sex, but not width
-pql_nwfull_mod <- glmmPQL(fixed = PARASITE_CODE ~ DEPTH_SCALED + DAY_SCALED + SEX_CODE + SHELL_CONDITION_CODE + BLACKMAT_CODE + LEG_CONDITION_CODE, random = list(s.YEAR = ~1, LOCATION_CODE = ~1), 
-                        data = crabdat,
-                        family = "binomial")
-summary(pql_nwfull_mod)
-
-pql_nsfull_mod <- glmmPQL(fixed = PARASITE_CODE ~ DEPTH_SCALED + DAY_SCALED + WIDTH_SCALED + SHELL_CONDITION_CODE + BLACKMAT_CODE + LEG_CONDITION_CODE, random = list(s.YEAR = ~1, LOCATION_CODE = ~1), 
-                        data = crabdat,
-                        family = "binomial")
-pql_nsfull_mod
-```
-Both models ended up fairly similar - Black Mat has the strongest effect on parasite code (a negative effect, specifically), followed by shell condition. Then sex or carapace width have slight positive effects, depth has a slight negative effect, and leg condition has a negligible effect. 
-
-However, this doesn't produce AIC values or give a way to compare our models. Therefore, we'll try to run this again, but with Laplace Approximation
-
-
 #### Determining What Variables to Include using Laplace Approximation
 
 Our full model is too large to directly run. To determine what variables to include in our full model, we will make a Laplace Approximation model with each variable individually plus the random effects, and then compare that to a null model that contains just the random effects. Then we will use AIC to determine whether the variable improves the model over the null model. If so, we will include it in the full model.
@@ -165,6 +144,7 @@ blackmat_mod <- glmer(PARASITE_CODE ~ BLACKMAT_CODE + (1 | LOCATION_CODE) + (1 |
                       family = binomial)
 extractAIC(blackmat_mod)
 extractAIC(blackmat_mod)[2] < AIC_null
+AIC_null - extractAIC(blackmat_mod)[2]
 # Looks like Black Mat improves the model!
 
 depth_mod <- glmer(PARASITE_CODE ~ DEPTH_SCALED + (1 | LOCATION_CODE) + (1 | s.YEAR),
@@ -172,6 +152,7 @@ depth_mod <- glmer(PARASITE_CODE ~ DEPTH_SCALED + (1 | LOCATION_CODE) + (1 | s.Y
                       family = binomial)
 extractAIC(depth_mod)
 extractAIC(depth_mod) < AIC_null
+AIC_null - extractAIC(depth_mod)[2]
 # Looks like depth also improves the model!
 
 shellcond_mod <- glmer(PARASITE_CODE ~ SHELL_CONDITION_CODE + (1 | LOCATION_CODE) + (1 | s.YEAR),
@@ -179,6 +160,7 @@ shellcond_mod <- glmer(PARASITE_CODE ~ SHELL_CONDITION_CODE + (1 | LOCATION_CODE
                       family = binomial)
 extractAIC(shellcond_mod)
 extractAIC(shellcond_mod) < AIC_null
+AIC_null - extractAIC(shellcond_mod)[2]
 # Shell condition also improves the model!
 
 day_mod <- glmer(PARASITE_CODE ~ DAY_SCALED + (1 | LOCATION_CODE) + (1 | s.YEAR),
@@ -186,6 +168,7 @@ day_mod <- glmer(PARASITE_CODE ~ DAY_SCALED + (1 | LOCATION_CODE) + (1 | s.YEAR)
                       family = binomial)
 extractAIC(day_mod)
 extractAIC(day_mod) < AIC_null
+AIC_null - extractAIC(day_mod)[2]
 # Day also improves the model (though just barely)
 
 CW_mod <- glmer(PARASITE_CODE ~ WIDTH_SCALED + (1 | LOCATION_CODE) + (1 | s.YEAR),
@@ -193,6 +176,7 @@ CW_mod <- glmer(PARASITE_CODE ~ WIDTH_SCALED + (1 | LOCATION_CODE) + (1 | s.YEAR
                       family = binomial)
 extractAIC(CW_mod)
 extractAIC(CW_mod) < AIC_null
+AIC_null - extractAIC(CW_mod)[2]
 # Carapace width also improves the model
 
 sex_mod <- glmer(PARASITE_CODE ~ SEX_CODE + (1 | LOCATION_CODE) + (1 | s.YEAR),
@@ -200,12 +184,14 @@ sex_mod <- glmer(PARASITE_CODE ~ SEX_CODE + (1 | LOCATION_CODE) + (1 | s.YEAR),
                       family = binomial)
 extractAIC(sex_mod)
 extractAIC(sex_mod) < AIC_null
+AIC_null - extractAIC(sex_mod)[2]
 
 legcond_mod <- glmer(PARASITE_CODE ~ LEG_CONDITION_CODE + (1 | LOCATION_CODE) + (1 | s.YEAR),
                       data = crabdat,
                       family = binomial)
 extractAIC(legcond_mod)
 extractAIC(legcond_mod) < AIC_null
+AIC_null - extractAIC(legcond_mod)[2]
 # Well shoot, leg condition also improves over the null model
 
 
@@ -325,106 +311,5 @@ logitgof(crabdat$PARASITE_CODE, fitted(second_mod), g = 10)
 # In both cases, looks like we DO have variation that isn't accounted for, indicating we're missing parameters in our model. Disappointing, but we included all possible parameters in our model initially
 ```
 
-### Fitting to a Negative Binomial Model
-
-
-```{r}
-# First, convert response variable to be numeric
-crabdat$PARASITE_CODE <- as.numeric(as.character(crabdat$PARASITE_CODE))
-
-# Fitting our old global model that incorporates effect of all except sex and leg condition
-nb_first_mod <- glmer.nb(PARASITE_CODE ~ BLACKMAT_CODE + SHELL_CONDITION_CODE + (1 | LOCATION_CODE) + (1 | s.YEAR), 
-                       data = crabdat, 
-                       family = binomial, 
-                       na.action = "na.fail",   # This chunk is for the dredge() function used later
-                       control = glmerControl(optimizer = c("bobyqa"))) # This is to improve optimization
-
-#Next, update the model to include the effects of depth
-nb_two_mod <- update(nb_first_mod, PARASITE_CODE ~ BLACKMAT_CODE + SHELL_CONDITION_CODE + DEPTH_SCALED + (1 | LOCATION_CODE) + (1 | s.YEAR))
-
-# Next, update the model to include the effects of day
-nb_three_mod <- update(nb_two_mod, PARASITE_CODE ~ BLACKMAT_CODE + SHELL_CONDITION_CODE  + DEPTH_SCALED  + DAY_SCALED + (1 | LOCATION_CODE) + (1 | s.YEAR))
-
-# Next, update the model to include the effects of carapace width. Our negative binomial model now includes all the variables from our full average model!
-
-nb_CW_mod <- update(nb_three_mod, PARASITE_CODE ~ BLACKMAT_CODE + SHELL_CONDITION_CODE + DEPTH_SCALED + DAY_SCALED + WIDTH_SCALED + (1 | LOCATION_CODE) + (1 | s.YEAR))
-
-nb_mods <- dredge(nb_CW_mod, beta = "none",
-       eval = TRUE,
-       rank = "AICc")
-# See all the resulting models
-nb_mods
-
-# Again, looks like only two of our models have weights > 0 (though the weights are a bit different from our original model)! Let's look at them:
-best_nbs <- get.models(nb_mods, subset = weight > 0.01)
-
-# First model - heaviest weight, at 0.72
-first_nb <- best_nbs[[1]]
-first_nb
-summary(first_nb)
-
-# Second model - contains the rest of the weight at 0.28
-second_nb <- best_nbs[[2]]
-second_nb
-summary(second_nb)
-
-# Average models based on AICc
-avg_nb <- model.avg(best_nbs, beta = "none")
-
-# See what that average model looks like
-avg_nb$coefficients
-summary(avg_nb)
-```
-
-
-```{r graph_creation}
-# Shell condition and Hematodinium
-ggplot(crabdat, aes(fill = PARASITE_CODE, x = SHELL_CONDITION_CODE)) +
-  geom_bar(position = "fill") +
-  labs(x = "Shell condition",
-       y = "Proportion") +
-  scale_x_discrete(labels = c("Fresh", "New", "Old", "Very old")) +
-  scale_fill_manual(values = viridis(2),
-                    name = "Hematodinium",
-                    labels = c("Uninfected", "Infected"))
-
-
-
-# Depth and Hematodinium
-ggplot(crabdat, aes(x = PARASITE_CODE, y = DEPTH_FATHOMS)) +
-  geom_violin() +
-  scale_y_reverse() +
-  labs(x = "Hematodinium", 
-       y = "Depth (fathoms)") +
-  scale_x_discrete(labels = c("Uninfected", "Infected"))
-  theme_minimal()
-  
-# Carapace Width  and Hematodinium
-ggplot(crabdat, aes(x = PARASITE_CODE, y = WIDTH_MILLIMETERS)) +
-  geom_violin() +
-  labs(x = "Hematodinium", 
-       y = "Carapace width (mm)") +
-  scale_x_discrete(labels = c("Uninfected", "Infected"))
-  theme_minimal()
-  
-
-  
-
-
-# Black Mat and Hematodinium
-ggplot(crabdat, aes(fill = PARASITE_CODE, x = BLACKMAT_CODE)) +
-  geom_bar(position = "fill") +
-  labs(x = "Black Mat",
-       y = "Proportion") +
-  scale_x_discrete(labels = c("Uninfected", "Infected")) +
-  scale_fill_manual(values = viridis(2),
-                    name = "Hematodinium",
-                    labels = c("Uninfected", "Infected"))
-  
-
-
-nrow(crabdat[crabdat$PARASITE_CODE==1,])
-
-```
 
 
