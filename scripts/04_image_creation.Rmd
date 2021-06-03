@@ -39,9 +39,9 @@ crabdat$LEG_CONDITION_CODE <- ordered(crabdat$LEG_CONDITION_CODE)
 # Shell condition and Hematodinium
 ggplot(crabdat, aes(fill = PARASITE_CODE, x = SHELL_CONDITION_CODE)) +
   geom_bar(position = "fill") +
-  labs(x = "Shell condition",
+  labs(x = "Months since last molt",
        y = "Proportion") +
-  scale_x_discrete(labels = c("Fresh", "New", "Old", "Very old")) +
+  scale_x_discrete(labels = c("0-2", "2-12", "12-24", "24+")) +
   scale_fill_manual(values = viridis(2),
                     name = "Hematodinium",
                     labels = c("Uninfected", "Infected"))
