@@ -42,3 +42,5 @@ data: unmodified data files
 output: output from analyses and modified data files
 
 reports: presentation and analyses
+
+scripts: all code used to analyze data
