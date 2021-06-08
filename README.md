@@ -8,28 +8,6 @@ Last edited README: 2021-06-03
 Modeling _Hematodinium sp._ infection in Alaskan _Chionoecetes bairdi_ (Tanner crab)
 
 
-
-Examining differential expression of shared _Hematodinium_/_C. bairdi_ libraries over temperature and time.
-
-All libraries originate from Grace Crandall's research. The same libraries and general notation is used here. 
-
-# Tool Information and Software Versions
-
-### kallisto: version 0.46.0
-
-### Trinotate: version 3.2.1
-
-### Jupyter Lab: version 2.1.5
-
-### Jupyter Notebook: version 6.0.3
-
-### Operating system:
-```
-Windows 10, x64 (OS build: 18363.1256)
-Running WSL version 1
-```
-
-
 ### R packages and info:
 ```
 R version 4.0.4 (2021-02-15)
